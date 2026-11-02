@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Новий сеанс{% endblock %}
+{% block content %}
+<h1>Запис на сеанс</h1>
+<p class="muted">Перевірку накладок, спеціалізації фахівця і типу кабінету виконують тригери бази даних.</p>
+<form method="post" class="card grid">
+  <label class="wide">Курс і процедура*
+    <select name="course_proc" required>
+      {% for cp in course_procs %}
+        {% set val = cp.course_id ~ ':' ~ cp.procedure_id %}
+        <option value="{{ val }}" {% if form.course_proc == val %}selected{% endif %}>
+          {{ cp.last_name }} {{ cp.first_name }} - курс № {{ cp.course_id }} - {{ cp.procedure_name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Фахівець*
+    <select name="specialist_id" required>
+      {% for s in specialists %}
+        <option value="{{ s.specialist_id }}" {% if form.specialist_id == s.specialist_id|string %}selected{% endif %}>
+          {{ s.last_name }} {{ s.first_name }} ({{ s.spec }})</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Кабінет*
+    <select name="room_id" required>
+      {% for r in rooms %}
+        <option value="{{ r.room_id }}" {% if form.room_id == r.room_id|string %}selected{% endif %}>
+          {{ r.room_number }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Дата*<input type="date" name="date" value="{{ form.date or '' }}" required></label>
+  <label>Час початку*<input type="time" name="time" value="{{ form.time or '' }}" step="300" required></label>
+  <div class="wide"><button type="submit">Записати</button></div>
+</form>
+{% endblock %}

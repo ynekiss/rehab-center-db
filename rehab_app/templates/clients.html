@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Пацієнти{% endblock %}
+{% block content %}
+<h1>Пацієнти</h1>
+<form class="inline" method="get">
+  <input type="text" name="q" value="{{ q }}" placeholder="Прізвище або телефон">
+  <button type="submit">Знайти</button>
+  {% if q %}<a href="{{ url_for('clients') }}">Скинути</a>{% endif %}
+</form>
+<p class="muted">Знайдено записів: {{ clients|length }}</p>
+<table>
+  <thead>
+    <tr><th>Код</th><th>ПІБ</th><th>Дата народження</th><th>Телефон</th>
+        <th>Курси</th></tr>
+  </thead>
+  <tbody>
+  {% for c in clients %}
+    <tr>
+      <td>{{ c.client_id }}</td>
+      <td>{{ c.last_name }} {{ c.first_name }} {{ c.middle_name or '' }}</td>
+      <td>{{ c.birth_date.strftime('%d.%m.%Y') }}</td>
+      <td>{{ c.phone }}</td>
+      <td>
+        {% for cid in c.course_ids %}
+          <a href="{{ url_for('course', course_id=cid) }}">№ {{ cid }}</a>
+        {% else %}<span class="muted">немає</span>{% endfor %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="muted">Пацієнтів не знайдено</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

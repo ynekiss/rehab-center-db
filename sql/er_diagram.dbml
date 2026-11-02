@@ -1,0 +1,168 @@
+// База даних реабілітаційного центру (rehab_center), MySQL 8
+// Код для dbdiagram.io
+
+Enum gender_type {
+  male
+  female
+}
+
+Enum category_type {
+  highest
+  first
+  second
+  none
+}
+
+Enum room_type_enum {
+  gym
+  massage
+  physio
+  pool
+  ergo
+  psych
+}
+
+Enum course_status {
+  active
+  completed
+  cancelled
+}
+
+Enum session_status {
+  planned
+  done
+  missed
+  cancelled
+}
+
+Enum wellbeing_type {
+  poor
+  fair
+  good
+  excellent
+}
+
+Enum payment_method {
+  cash
+  card
+  transfer
+}
+
+Table specializations {
+  specialization_id int [pk, increment]
+  name varchar(100) [not null, unique]
+  description varchar(255)
+}
+
+Table clients {
+  client_id int [pk, increment]
+  last_name varchar(50) [not null]
+  first_name varchar(50) [not null]
+  middle_name varchar(50)
+  birth_date date [not null]
+  gender gender_type [not null]
+  phone varchar(20) [not null]
+  email varchar(100) [unique]
+  registered_at date [not null, default: `CURRENT_DATE`]
+  indexes {
+    (last_name, first_name, birth_date) [unique, name: 'uq_clients_person']
+    phone [name: 'idx_clients_phone']
+  }
+}
+
+Table specialists {
+  specialist_id int [pk, increment]
+  last_name varchar(50) [not null]
+  first_name varchar(50) [not null]
+  middle_name varchar(50)
+  specialization_id int [not null]
+  category category_type [not null, default: 'none']
+  experience_years tinyint [not null, default: 0]
+  phone varchar(20) [not null, unique]
+  db_login varchar(32) [unique]
+  is_active boolean [not null, default: true]
+}
+
+Table rooms {
+  room_id int [pk, increment]
+  room_number varchar(10) [not null, unique]
+  room_type room_type_enum [not null]
+  capacity tinyint [not null, default: 1]
+}
+
+Table procedures {
+  procedure_id int [pk, increment]
+  name varchar(100) [not null, unique]
+  duration_min smallint [not null]
+  price decimal(8,2) [not null]
+  specialization_id int [not null]
+  room_type room_type_enum [not null]
+}
+
+Table treatment_courses {
+  course_id int [pk, increment]
+  client_id int [not null]
+  curator_id int [not null]
+  start_date date [not null]
+  end_date date [not null]
+  diagnosis varchar(255) [not null]
+  referral varchar(255)
+  goal varchar(255) [not null]
+  status course_status [not null, default: 'active']
+}
+
+Table course_procedures {
+  course_id int [not null]
+  procedure_id int [not null]
+  planned_sessions tinyint [not null]
+  unit_price decimal(8,2) [not null]
+  indexes { (course_id, procedure_id) [pk] }
+}
+
+Table sessions {
+  session_id int [pk, increment]
+  course_id int [not null]
+  procedure_id int [not null]
+  specialist_id int [not null]
+  room_id int [not null]
+  start_at datetime [not null]
+  price decimal(8,2) [not null]
+  status session_status [not null, default: 'planned']
+  indexes {
+    (specialist_id, start_at) [name: 'idx_sessions_specialist_time']
+    (room_id, start_at) [name: 'idx_sessions_room_time']
+    start_at [name: 'idx_sessions_start']
+  }
+}
+
+Table progress_records {
+  record_id int [pk, increment]
+  course_id int [not null]
+  session_id int [unique]
+  recorded_on date [not null]
+  pain_score tinyint [not null]
+  rom_degrees smallint
+  wellbeing wellbeing_type
+  comment text
+}
+
+Table payments {
+  payment_id int [pk, increment]
+  course_id int [not null]
+  amount decimal(10,2) [not null]
+  paid_at datetime [not null]
+  method payment_method [not null]
+}
+
+Ref: specialists.specialization_id > specializations.specialization_id [delete: restrict, update: restrict]
+Ref: procedures.specialization_id > specializations.specialization_id [delete: restrict, update: restrict]
+Ref: treatment_courses.client_id > clients.client_id [delete: restrict, update: restrict]
+Ref: treatment_courses.curator_id > specialists.specialist_id [delete: restrict, update: restrict]
+Ref: course_procedures.course_id > treatment_courses.course_id [delete: cascade, update: restrict]
+Ref: course_procedures.procedure_id > procedures.procedure_id [delete: restrict, update: restrict]
+Ref: sessions.(course_id, procedure_id) > course_procedures.(course_id, procedure_id) [delete: restrict, update: restrict]
+Ref: sessions.specialist_id > specialists.specialist_id [delete: restrict, update: restrict]
+Ref: sessions.room_id > rooms.room_id [delete: restrict, update: restrict]
+Ref: progress_records.course_id > treatment_courses.course_id [delete: restrict, update: restrict]
+Ref: progress_records.session_id - sessions.session_id [delete: set null, update: restrict]
+Ref: payments.course_id > treatment_courses.course_id [delete: restrict, update: restrict]

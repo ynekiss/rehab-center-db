@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Новий пацієнт{% endblock %}
+{% block content %}
+<h1>Реєстрація пацієнта</h1>
+<form method="post" class="card grid">
+  <label>Прізвище*<input name="last_name" value="{{ form.last_name or '' }}" maxlength="50" required></label>
+  <label>Ім'я*<input name="first_name" value="{{ form.first_name or '' }}" maxlength="50" required></label>
+  <label>По батькові<input name="middle_name" value="{{ form.middle_name or '' }}" maxlength="50"></label>
+  <label>Дата народження*<input type="date" name="birth_date" value="{{ form.birth_date or '' }}" required></label>
+  <label>Стать*
+    <select name="gender" required>
+      <option value="female" {% if form.gender == 'female' %}selected{% endif %}>жіноча</option>
+      <option value="male" {% if form.gender == 'male' %}selected{% endif %}>чоловіча</option>
+    </select>
+  </label>
+  <label>Телефон*<input name="phone" value="{{ form.phone or '' }}" placeholder="+380XXXXXXXXX" required></label>
+  <label>Email<input type="email" name="email" value="{{ form.email or '' }}"></label>
+  <div class="wide"><button type="submit">Зареєструвати</button></div>
+</form>
+{% endblock %}

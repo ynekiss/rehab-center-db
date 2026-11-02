@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Курс № {{ c.course_id }}{% endblock %}
+{% block content %}
+<h1>Курс № {{ c.course_id }} <span class="badge {{ c.status }}">{{ c.status|ua }}</span></h1>
+<div class="card info">
+  <div><b>Пацієнт:</b> {{ c.last_name }} {{ c.first_name }} {{ c.middle_name or '' }}</div>
+  <div><b>Діагноз:</b> {{ c.diagnosis }}</div>
+  <div><b>Мета:</b> {{ c.goal }}</div>
+  <div><b>Куратор:</b> {{ c.cur_last }} {{ c.cur_first }}</div>
+  <div><b>Термін:</b> {{ c.start_date.strftime('%d.%m.%Y') }} - {{ c.end_date.strftime('%d.%m.%Y') }}</div>
+  <div><b>Проходження:</b> {{ c.done_cnt }} з {{ c.planned_total }} сеансів
+       ({{ c.completion_pct }} %), пропущено {{ c.missed_cnt }}</div>
+  <div class="bar"><span style="width: {{ [c.completion_pct|float, 100]|min }}%"></span></div>
+</div>
+
+<h2>Склад курсу</h2>
+<table>
+  <thead><tr><th>Процедура</th><th>Заплановано</th><th>Проведено</th><th>Пропущено</th></tr></thead>
+  <tbody>
+  {% for p in procs %}
+    <tr><td>{{ p.name }}</td><td>{{ p.planned_sessions }}</td>
+        <td>{{ p.done_cnt|int }}</td><td>{{ p.missed_cnt|int }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Прогрес лікування</h2>
+{% if progress is none %}
+<p class="muted">Доступ до записів прогресу мають лише фахівці та керівник центру.</p>
+{% else %}
+<table>
+  <thead><tr><th>Дата</th><th>Біль (0-10)</th><th></th><th>Обсяг рухів</th>
+             <th>Самопочуття</th><th>Коментар</th></tr></thead>
+  <tbody>
+  {% for r in progress %}
+    <tr>
+      <td>{{ r.recorded_on.strftime('%d.%m.%Y') }}</td>
+      <td class="num">{{ r.pain_score }}</td>
+      <td class="painbar"><span style="width: {{ r.pain_score * 10 }}%"></span></td>
+      <td>{{ r.rom_degrees ~ '°' if r.rom_degrees is not none else '-' }}</td>
+      <td>{{ r.wellbeing|ua }}</td>
+      <td>{{ r.comment or '' }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6" class="muted">Записів прогресу ще немає</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if progress|length > 1 %}
+  <p><b>Динаміка болю:</b> {{ progress[0].pain_score }} → {{ progress[-1].pain_score }}
+     (зміна {{ progress[-1].pain_score - progress[0].pain_score }} бал.)</p>
+{% endif %}
+{% endif %}
+{% endblock %}

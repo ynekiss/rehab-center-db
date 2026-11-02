@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Розклад{% endblock %}
+{% block content %}
+<h1>Розклад на {{ day.strftime('%d.%m.%Y') }}</h1>
+<form class="inline" method="get">
+  <input type="date" name="date" value="{{ day.isoformat() }}">
+  <select name="specialist">
+    <option value="">усі фахівці</option>
+    {% for s in specialists %}
+      <option value="{{ s.specialist_id }}" {% if s.specialist_id == specialist_id %}selected{% endif %}>
+        {{ s.last_name }} {{ s.first_name }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Показати</button>
+</form>
+<table>
+  <thead>
+    <tr><th>Час</th><th>Процедура</th><th>Кабінет</th><th>Фахівець</th>
+        <th>Пацієнт</th><th>Курс</th><th>Статус</th><th>Дія</th></tr>
+  </thead>
+  <tbody>
+  {% for s in sessions %}
+    <tr class="st-{{ s.status }}">
+      <td>{{ s.start_at.strftime('%H:%M') }}-{{ s.end_at.strftime('%H:%M') }}</td>
+      <td>{{ s.procedure_name }}</td>
+      <td>{{ s.room_number }}</td>
+      <td>{{ s.sp_last }} {{ s.sp_first[0] }}.</td>
+      <td>{{ s.cl_last }} {{ s.cl_first }}</td>
+      <td><a href="{{ url_for('course', course_id=s.course_id) }}">№ {{ s.course_id }}</a></td>
+      <td><span class="badge {{ s.status }}">{{ s.status|ua }}</span></td>
+      <td>
+        {% if s.status == 'planned' %}
+        <form method="post" action="{{ url_for('session_status', session_id=s.session_id) }}" class="row-actions">
+          <button name="status" value="done">проведено</button>
+          <button name="status" value="missed" class="secondary">пропуск</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="muted">На цю дату сеансів немає</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

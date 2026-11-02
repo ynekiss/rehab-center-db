@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Реабілітаційний центр{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <div class="brand">Реабілітаційний центр</div>
+  <nav>
+    <a href="{{ url_for('clients') }}">Пацієнти</a>
+    <a href="{{ url_for('client_new') }}">Новий пацієнт</a>
+    <a href="{{ url_for('schedule') }}">Розклад</a>
+    <a href="{{ url_for('session_new') }}">Новий сеанс</a>
+    <a href="{{ url_for('load_report') }}">Завантаження фахівців</a>
+  </nav>
+</header>
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="msg {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Завантаження фахівців{% endblock %}
+{% block content %}
+<h1>Завантаження фахівців</h1>
+<form class="inline" method="get">
+  з <input type="date" name="start" value="{{ start.isoformat() }}">
+  по <input type="date" name="end" value="{{ end.isoformat() }}">
+  <button type="submit">Сформувати</button>
+</form>
+<table>
+  <thead><tr><th>Місце</th><th>Фахівець</th><th>Спеціалізація</th>
+             <th>Сеансів</th><th>Годин</th><th>Завантаження</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr>
+      <td class="num">{{ r.load_rank }}</td>
+      <td>{{ r.last_name }} {{ r.first_name }}</td>
+      <td>{{ r.specialization }}</td>
+      <td class="num">{{ r.sessions_cnt }}</td>
+      <td class="num">{{ r.hours }}</td>
+      <td class="loadbar"><span style="width: {{ (r.hours|float / max_hours * 100)|round(1) }}%"></span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
